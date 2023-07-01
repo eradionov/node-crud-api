@@ -1,66 +1,91 @@
-import {HTTP_DELETE, HTTP_GET, HTTP_POST, HTTP_PUT, Request} from "./request";
-import {routeMetadata} from "./route_metadata";
-import {Response} from "./response";
-import {routeHandlers} from "./routes";
-import {Server} from "./server";
+import {HTTP_DELETE, HTTP_GET, HTTP_POST, HTTP_PUT} from "./request";
+import {exportRoutes} from "./routes";
+import {HandlerType} from "./route_definition";
 
 export function Controller(prefix: string = '') {
     return function <T extends { new (): {} }>(constructor: T) {
         const instance = new constructor();
-        const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);
+        const methods = Object.getOwnPropertyNames(constructor.prototype);
 
         for (const method of methods) {
             if (method !== 'constructor') {
-                // @ts-ignore
-                const handler: Request&Response|null =  instance[method as any];
+                const handler: HandlerType|undefined = Object.getOwnPropertyDescriptor(
+                    Object.getPrototypeOf(instance),
+                    method
+                )?.value;
 
-                if (handler instanceof Function) {
-                    const metadata = routeMetadata.get(`${instance.constructor.name}_${method}`);
+                if (undefined !== handler) {
+                    const metadata = Reflect.get(handler, 'route');
 
                     if (metadata) {
-                        routeHandlers.push({
-                            path: `/${prefix}/${metadata.path}`,
-                            method: metadata.method,
-                            handler,
-                        });
+                        exportRoutes(
+                            `/${prefix}/${metadata.path}`,
+                            metadata.method,
+                            handler.bind(instance),
+                        );
                     }
                 }
            }
         }
-
-        Server.doServe(routeHandlers);
-
     }
 }
 
 export function Get(path: string) {
-    return function(target: any, method: string, descriptor: PropertyDescriptor) {
-        routeMetadata.set(`${target.constructor.name}_${method}`, {method: HTTP_GET, path, handler: descriptor.value});
+    return function(_: any, _1: string, descriptor: PropertyDescriptor) {
+        Reflect.defineProperty(
+            descriptor.value,
+            'route',
+            {
+                value: {method: HTTP_GET, path, handler: descriptor.value},
+                writable: false,
+                enumerable: false
+            });
 
         return descriptor;
     }
 }
 
 export function Post(path: string) {
-    return function(target: any, method: string, descriptor: PropertyDescriptor) {
+    return function(_: any, _1: string, descriptor: PropertyDescriptor) {
 
-        routeMetadata.set(`${target.constructor.name}_${method}`, {method: HTTP_POST, path, handler: descriptor.value});
+        Reflect.defineProperty(
+            descriptor.value,
+            'route',
+            {
+                value: {method: HTTP_POST, path, handler: descriptor.value},
+                writable: false,
+                enumerable: false
+            });
 
         return descriptor;
     }
 }
 
 export function Put(path: string) {
-    return function(target: any, method: string, descriptor: PropertyDescriptor) {
-        routeMetadata.set(`${target.constructor.name}_${method}`, {method: HTTP_PUT, path, handler: descriptor.value});
+    return function(_: any, _1: string, descriptor: PropertyDescriptor) {
+        Reflect.defineProperty(
+            descriptor.value,
+            'route',
+            {
+                value: {method: HTTP_PUT, path, handler: descriptor.value},
+                writable: false,
+                enumerable: false
+            });
 
         return descriptor;
     }
 }
 
 export function Delete(path: string) {
-    return function(target: any, method: string, descriptor: PropertyDescriptor) {
-        routeMetadata.set(`${target.constructor.name}_${method}`, {method: HTTP_DELETE, path, handler: descriptor.value});
+    return function(_: any, _1: string, descriptor: PropertyDescriptor) {
+        Reflect.defineProperty(
+            descriptor.value,
+            'route',
+            {
+                value: {method: HTTP_DELETE, path, handler: descriptor.value},
+                writable: false,
+                enumerable: false
+            });
 
         return descriptor;
     }
