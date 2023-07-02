@@ -1,2 +1,5 @@
-# node-crud-api
-Implements node CRUD api task
+# Start prod
+npm run start:prod
+
+# Start dev
+npm run start:dev

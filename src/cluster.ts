@@ -1,5 +1,5 @@
-import cluster from "node:cluster";
-import {createServer} from "./Core/server";
+import cluster from 'node:cluster';
+import { createServer } from './Core/server';
 import './storage';
 
 export function startCluster(cpus: number, port: number) {

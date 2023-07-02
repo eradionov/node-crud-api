@@ -1,14 +1,14 @@
-import {createServer} from "./src/Core/server";
-import './src/Controller/User';
-import * as dotenv from 'dotenv'
-import {startCluster} from "./src/cluster";
-import {availableParallelism} from "node:os";
+import './Controller/User';
+import * as dotenv from 'dotenv';
+import { startCluster } from './cluster';
+import { availableParallelism } from 'node:os';
+import { createServer } from './Core/server';
 
 try {
     dotenv.config();
     const multiplier = 1000;
 
-    let port = parseInt(process.env.PORT || '0');
+    const port = parseInt(process.env.PORT || '0');
     const isMulti = (process.argv[2] ?? null) === 'multi';
 
     if (port <= 0) {
