@@ -1,6 +1,6 @@
-import { UserDTO } from './DTO/User';
-import { UniqueKeyException } from './Core/Exception/unique_error';
-import { NotFound } from './Core/Exception/not_found';
+import {UserDTO} from './DTO/User';
+import {UniqueKeyException} from './Core/Exception/unique_error';
+import {NotFound} from './Core/Exception/not_found';
 
 type Storage = Map<string, UserDTO>;
 

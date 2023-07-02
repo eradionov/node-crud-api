@@ -2,9 +2,11 @@ import {createServer} from "./src/Core/server";
 import './src/Controller/User';
 import * as dotenv from 'dotenv'
 import {startCluster} from "./src/cluster";
+import {availableParallelism} from "node:os";
 
 try {
     dotenv.config();
+    const multiplier = 1000;
 
     let port = parseInt(process.env.PORT || '0');
     const isMulti = (process.argv[2] ?? null) === 'multi';
@@ -14,7 +16,8 @@ try {
     }
 
     if (isMulti) {
-        startCluster(port);
+        const cpus = availableParallelism();
+        startCluster(cpus, multiplier * cpus);
     } else {
         createServer(port);
     }

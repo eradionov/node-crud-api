@@ -5,9 +5,9 @@
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node index.ts",
-    "start:dev": "nodemon",
-    "start:prod": "tsc index.ts",
     "start:multi": "ts-node ./index.ts multi",
+    "start:dev": "nodemon start",
+    "start:prod": "tsc index.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "jest"

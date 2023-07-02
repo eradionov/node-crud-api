@@ -1,10 +1,8 @@
 import cluster from "node:cluster";
 import {createServer} from "./Core/server";
-import {availableParallelism} from "node:os";
+import './storage';
 
-const cpus = availableParallelism() - 1;
-
-export function startCluster(port: number) {
+export function startCluster(cpus: number, port: number) {
     if (cluster.isPrimary) {
         console.log(`Primary ${process.pid} is running`);
 
@@ -14,6 +12,8 @@ export function startCluster(port: number) {
 
         cluster.on('exit', (worker, _, _2) => {
             console.log(`worker ${worker.process.pid} died`);
+            // Restart the worker
+            cluster.fork();
         });
 
         createServer(port);
