@@ -1,7 +1,7 @@
 import * as http from 'http';
 
 export interface Request {
-    request: http.IncomingMessage
+  request: http.IncomingMessage;
 }
 
 export const HTTP_GET = 'GET';

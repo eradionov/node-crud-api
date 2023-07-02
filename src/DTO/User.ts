@@ -1,8 +1,8 @@
 export class UserDTO {
-    constructor(
-        public readonly username: string,
-        public readonly age: number|null,
-        public readonly hobbies: string[]
-    ) {
-    }
+	constructor(
+    public readonly id: string,
+    public username: string,
+    public age: number,
+    public hobbies: string[],
+	) {}
 }

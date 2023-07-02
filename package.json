@@ -7,10 +7,10 @@
     "start": "ts-node index.ts",
     "start:dev": "nodemon",
     "start:prod": "tsc index.ts",
+    "start:multi": "ts-node ./index.ts multi",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint \"src|test/**/*.ts\" --fix",
-    "test": "jest --silent",
-    "test:verbose": "jest"
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "test": "jest"
   },
   "author": "Yauheni Radzivonau",
   "license": "ISC",
@@ -29,6 +29,7 @@
     "typescript": "^5.1.3"
   },
   "dependencies": {
+    "@types/uuid": "^9.0.2",
     "dotenv": "^16.3.1",
     "uuid": "^9.0.0"
   }
