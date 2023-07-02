@@ -1,21 +1,21 @@
 import { Controller, Delete, Get, Post, Put } from '../Core/decorators';
 import { Request } from '../Core/request';
 import {
-    CONTENT_TYPE_JSON,
-    HTTP_BAD_REQUEST,
-    HTTP_CREATED,
-    HTTP_INTERNAL_SERVER_ERROR,
-    HTTP_NO_CONTENT,
-    HTTP_NOT_FOUND,
-    HTTP_OK,
-    Response,
+	CONTENT_TYPE_JSON,
+	HTTP_BAD_REQUEST,
+	HTTP_CREATED,
+	HTTP_INTERNAL_SERVER_ERROR,
+	HTTP_NO_CONTENT,
+	HTTP_NOT_FOUND,
+	HTTP_OK,
+	Response,
 } from '../Core/response';
 import { findOne, getAll, remove, save, update } from '../storage';
 import {
-    isNotBlank,
-    isNotBlankStringArray,
-    isPositiveNumber,
-    isUuid,
+	isNotBlank,
+	isNotBlankStringArray,
+	isPositiveNumber,
+	isUuid,
 } from '../Validator/user';
 import { BadRequest } from '../Core/Exception/bad_request';
 import { UserDTO } from '../DTO/User';
@@ -25,10 +25,10 @@ import { NotFound } from '../Core/Exception/not_found';
 @Controller('api')
 export class User {
   @Get('users')
-    public getUsers(_: Request, res: Response, _3: Map<string, any>) {
-        res.response.writeHead(HTTP_OK, CONTENT_TYPE_JSON);
-        res.response.end(JSON.stringify(getAll()));
-    }
+	public getUsers(_: Request, res: Response, _3: Map<string, any>) {
+		res.response.writeHead(HTTP_OK, CONTENT_TYPE_JSON);
+		res.response.end(JSON.stringify(getAll()));
+	}
 
   @Get('users/:userId')
   public getUser(_: Request, res: Response, params: Map<string, any>): void {

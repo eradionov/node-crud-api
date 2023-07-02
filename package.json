@@ -5,9 +5,10 @@
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "ts-node ./src/index.ts",
     "build": "tsc",
-    "start:multi": "ts-node ./index.ts multi",
+    "start:multi:dev": "ts-node ./src/index.ts multi",
+    "start:multi:prod": "npm run build && node --experimental-specifier-resolution=node ./build/index.js multi",
     "start:dev": "nodemon start",
     "start:prod": "npm run build && node --experimental-specifier-resolution=node ./build/index.js",
     "format": "prettier --write \"src/**/*.ts\"",
