@@ -39,9 +39,9 @@ export class User {
   			throw new BadRequest('Invalid id');
   		}
 
-  		const user = findOne(params.get('userId'));
+  		const user = findOne(userId);
 
-  		if (null === user) {
+  		if (undefined === user) {
   			throw new NotFound(userId);
   		}
 
@@ -128,13 +128,13 @@ export class User {
   		}
 
   		if (
-  			null === body ||
+  			undefined === body ||
         (!isNotBlank(body.username) &&
           !isPositiveNumber(body.age) &&
           !isNotBlankStringArray(body.hobbies))
   		) {
   			throw new BadRequest(
-  				'Username, ageor hobbies should be passed for update',
+  				'Username, age or hobbies should be passed for update',
   			);
   		}
 

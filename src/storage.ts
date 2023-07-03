@@ -49,7 +49,7 @@ export function update(user: UserDTO) {
 export function remove(id: string) {
 	const user = findOne(id);
 
-	if (user === undefined) {
+	if (!(user instanceof UserDTO)) {
 		throw new NotFound(id);
 	}
 

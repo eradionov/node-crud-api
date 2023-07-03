@@ -13,44 +13,42 @@ import cluster from 'node:cluster';
 import * as os from 'os';
 
 export const createServer = (port: number, isMulti: boolean) => {
-	if (isMulti) {
-		const cpus = availableParallelism();
-		const multiClusterPort =
-      cpus * parseInt(process.env.CLUSTER_PORT_MULTIPLIER || '1000', 10);
-
-		if (cluster.isPrimary) {
-			for (let i = 0; i < cpus; i++) {
-				const worker = cluster.fork();
-
-				worker.on('message', function (message) {
-					syncMultiClusterStorage(message);
-				});
-			}
-
-			cluster.on('exit', (worker, _1, _2) => {
-				console.log(`\x1b[33m worker ${worker} died. Restarting...  \x1b[0m`);
-
-				const w = cluster.fork();
-
-				w.on('message', function (message) {
-					syncMultiClusterStorage(message);
-				});
-			});
-
-			return;
-		}
-
-		if (cluster.isWorker) {
-			process.on('message', (message) => {
-				syncMultiClusterStorage(message as IClusterNotification);
-			});
-			startServer(multiClusterPort + cluster.worker?.id! - 1);
-		}
+	if (!isMulti) {
+		startServer(port);
 
 		return;
 	}
 
-	startServer(port);
+	const cpus = availableParallelism();
+	const multiClusterPort =
+  cpus * parseInt(process.env.CLUSTER_PORT_MULTIPLIER || '1000', 10);
+
+	if (cluster.isPrimary) {
+		for (let i = 0; i < cpus; i++) {
+			const worker = cluster.fork();
+
+			worker.on('message', function (message) {
+				syncMultiClusterStorage(message);
+			});
+		}
+
+		cluster.on('exit', (worker, _1, _2) => {
+			console.log(`\x1b[33m worker ${worker} died. Restarting...  \x1b[0m`);
+
+			const w = cluster.fork();
+
+			w.on('message', function (message) {
+				syncMultiClusterStorage(message);
+			});
+		});
+	}
+
+	if (cluster.isWorker) {
+		process.on('message', (message) => {
+			syncMultiClusterStorage(message as IClusterNotification);
+		});
+		startServer(multiClusterPort + cluster.worker?.id! - 1);
+	}
 };
 
 const startServer = (port: number) => {
@@ -65,15 +63,13 @@ const startServer = (port: number) => {
 				if (route === undefined) {
 					res.writeHead(HTTP_NOT_FOUND, CONTENT_TYPE_JSON);
 					res.end('Not Found');
-
-					return;
+				} else {
+					route.handler(
+						{ request: req },
+						{ response: res },
+						await getParametersBag(route, req),
+					);
 				}
-
-				route.handler(
-					{ request: req },
-					{ response: res },
-					await getParametersBag(route, req),
-				);
 			} catch (error: any) {
 				console.error(error);
 
