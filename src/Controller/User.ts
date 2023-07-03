@@ -11,12 +11,7 @@ import {
 	Response,
 } from '../Core/response';
 import { findOne, getAll, remove, save, update } from '../storage';
-import {
-	isNotBlank,
-	isNotBlankStringArray,
-	isPositiveNumber,
-	isUuid,
-} from '../Validator/user';
+import { isUuid, validateBody } from '../Validator/user';
 import { BadRequest } from '../Core/Exception/bad_request';
 import { UserDTO } from '../DTO/User';
 import { v4 as uuid } from 'uuid';
@@ -75,23 +70,7 @@ export class User {
   	try {
   		const body = parameters.get('body');
 
-  		if (body === undefined) {
-  			throw new BadRequest('Username, age, hobbies are required parameters');
-  		}
-
-  		if (!isNotBlank(body?.username)) {
-  			throw new BadRequest('Username is required');
-  		}
-
-  		if (!isPositiveNumber(body?.age)) {
-  			throw new BadRequest('Age is required and should be positive number');
-  		}
-
-  		if (!isNotBlankStringArray(body?.hobbies)) {
-  			throw new BadRequest(
-  				'Hobbies is required and should be empty array or contain data',
-  			);
-  		}
+		validateBody(body);
 
   		save(new UserDTO(uuid(), body.username, body.age, body.hobbies));
 
@@ -127,34 +106,9 @@ export class User {
   			throw new NotFound(userId);
   		}
 
-  		if (
-  			undefined === body ||
-        (!isNotBlank(body.username) &&
-          !isPositiveNumber(body.age) &&
-          !isNotBlankStringArray(body.hobbies))
-  		) {
-  			throw new BadRequest(
-  				'Username, age or hobbies should be passed for update',
-  			);
-  		}
+		validateBody(body);
 
-		let userName = user.username;
-		let age = user.age;
-		let hobbies = user.hobbies;
-
-  		if (isNotBlank(body.username)) {
-			userName = body.username;
-  		}
-
-  		if (isPositiveNumber(body.age)) {
-			age = body.age;
-  		}
-
-  		if (isNotBlankStringArray(body.hobbies)) {
-			hobbies = body.hobbies;
-  		}
-
-  		update(new UserDTO(userId, userName, age, hobbies));
+  		update(new UserDTO(userId, body.username, body.age, body.hobbies));
 
   		res.response.writeHead(HTTP_OK, CONTENT_TYPE_JSON);
   		res.response.end();
