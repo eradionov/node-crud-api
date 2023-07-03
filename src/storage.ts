@@ -76,21 +76,19 @@ function notify(type: MessageType, user?: UserDTO) {
 }
 
 export function syncMultiClusterStorage(notification: IClusterNotification) {
-	switch (notification.type) {
-	case MessageType.CREATE:
-		if (findOne(notification.user.id) !== undefined) {
-			return;
+	try {
+		switch (notification.type) {
+			case MessageType.CREATE:
+				save(notification.user);
+				break;
+			case MessageType.UPDATE:
+				update(notification.user);
+				break;
+			case MessageType.DELETE:
+				remove(notification.user.id);
+				break;
 		}
-		save(notification.user);
-		break;
-	case MessageType.UPDATE:
-		update(notification.user);
-		break;
-	case MessageType.DELETE:
-		if (findOne(notification.user.id) === undefined) {
-			return;
-		}
-		remove(notification.user.id);
-		break;
+	} catch (error) {
+		// Phantom sync issues are not interesting for us
 	}
 }
