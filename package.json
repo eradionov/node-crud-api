@@ -1,0 +1,39 @@
+{
+  "name": "crud-api",
+  "version": "1.0.0",
+  "description": "Implements simple node CRUD",
+  "main": "build/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "ts-node ./src/index.ts",
+    "build": "tsc",
+    "start:multi:dev": "ts-node ./src/index.ts multi",
+    "start:multi:prod": "npm run build && node --experimental-specifier-resolution=node ./build/index.js multi",
+    "start:dev": "nodemon start",
+    "start:prod": "npm run build && node --experimental-specifier-resolution=node ./build/index.js",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "test": "jest"
+  },
+  "author": "Yauheni Radzivonau",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.8",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "@types/uuid": "^9.0.2",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.0"
+  }
+}

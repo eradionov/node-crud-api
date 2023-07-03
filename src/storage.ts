@@ -1,0 +1,94 @@
+import { UserDTO } from './DTO/User';
+import { UniqueKeyException } from './Core/Exception/unique_error';
+import { NotFound } from './Core/Exception/not_found';
+import cluster from 'node:cluster';
+
+type Storage = Map<string, UserDTO>;
+
+const storage: Storage = new Map<string, UserDTO>();
+
+enum MessageType {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+}
+
+export interface IClusterNotification {
+  type: MessageType;
+  user: UserDTO;
+}
+
+export function getAll() {
+	return Array.from(storage.values());
+}
+
+export function findOne(id: string): UserDTO | undefined {
+	return storage.get(id);
+}
+
+export function save(user: UserDTO) {
+	if (findOne(user.id) !== undefined) {
+		throw new UniqueKeyException(user.id);
+	}
+
+	storage.set(user.id, user);
+	notify(MessageType.CREATE, user);
+}
+
+export function update(user: UserDTO) {
+	const foundUser: UserDTO|undefined = findOne(user?.id);
+
+	if (foundUser === undefined) {
+		throw new NotFound(user?.id);
+	}
+
+	if (UserDTO.equals(user, foundUser)) {
+		return;
+	}
+
+	storage.set(user.id, user as UserDTO);
+	notify(MessageType.UPDATE, user);
+}
+
+export function remove(id: string) {
+	const user = findOne(id);
+
+	if (user === undefined) {
+		throw new NotFound(id);
+	}
+
+	storage.delete(id);
+	notify(MessageType.DELETE, user);
+}
+
+function notify(type: MessageType, user?: UserDTO) {
+	if (!cluster.isPrimary) {
+    process?.send!({ type, user } as IClusterNotification);
+	}
+
+	if (cluster.isPrimary) {
+		for (const id in cluster.workers) {
+			if (cluster?.workers[id]?.isConnected() && parseInt(id) !== cluster.worker?.id) {
+				cluster?.workers[id]?.send({ type, user } as IClusterNotification);
+			}
+		}
+	}
+}
+
+export function syncMultiClusterStorage(notification: IClusterNotification) {
+	try {
+		switch (notification.type) {
+			case MessageType.CREATE:
+				save(notification.user);
+				break;
+			case MessageType.UPDATE:
+				update(notification.user);
+				break;
+			case MessageType.DELETE:
+				remove(notification.user.id);
+				break;
+		}
+	} catch (error) {
+		// Phantom sync issues are not interesting for us
+	}
+}
