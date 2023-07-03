@@ -27,7 +27,7 @@ export const createServer = (port: number, isMulti: boolean) => {
 		for (let i = 0; i < cpus; i++) {
 			const worker = cluster.fork();
 
-			worker.on('message', function (message) {
+			worker.on('message', function (message: IClusterNotification) {
 				syncMultiClusterStorage(message);
 			});
 		}
@@ -37,15 +37,15 @@ export const createServer = (port: number, isMulti: boolean) => {
 
 			const w = cluster.fork();
 
-			w.on('message', function (message) {
+			w.on('message', function (message: IClusterNotification) {
 				syncMultiClusterStorage(message);
 			});
 		});
 	}
 
 	if (cluster.isWorker) {
-		process.on('message', (message) => {
-			syncMultiClusterStorage(message as IClusterNotification);
+		process.on('message', (message: IClusterNotification) => {
+			syncMultiClusterStorage(message);
 		});
 		startServer(multiClusterPort + cluster.worker?.id! - 1);
 	}

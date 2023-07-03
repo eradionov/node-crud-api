@@ -5,7 +5,7 @@ import cluster from 'node:cluster';
 
 type Storage = Map<string, UserDTO>;
 
-const storage: Storage = new Map();
+const storage: Storage = new Map<string, UserDTO>();
 
 enum MessageType {
   CREATE = 'CREATE',
@@ -36,20 +36,24 @@ export function save(user: UserDTO) {
 }
 
 export function update(user: UserDTO) {
-	const foundUser = findOne(user?.id);
+	const foundUser: UserDTO|undefined = findOne(user?.id);
 
 	if (foundUser === undefined) {
 		throw new NotFound(user?.id);
 	}
 
-	storage.set(user.id, user);
+	if (UserDTO.equals(user, foundUser)) {
+		return;
+	}
+
+	storage.set(user.id, user as UserDTO);
 	notify(MessageType.UPDATE, user);
 }
 
 export function remove(id: string) {
 	const user = findOne(id);
 
-	if (!(user instanceof UserDTO)) {
+	if (user === undefined) {
 		throw new NotFound(id);
 	}
 
@@ -64,7 +68,7 @@ function notify(type: MessageType, user?: UserDTO) {
 
 	if (cluster.isPrimary) {
 		for (const id in cluster.workers) {
-			if (cluster?.workers[id]?.isConnected()) {
+			if (cluster?.workers[id]?.isConnected() && parseInt(id) !== cluster.worker?.id) {
 				cluster?.workers[id]?.send({ type, user } as IClusterNotification);
 			}
 		}
@@ -80,9 +84,6 @@ export function syncMultiClusterStorage(notification: IClusterNotification) {
 		save(notification.user);
 		break;
 	case MessageType.UPDATE:
-		if (findOne(notification.user.id) === undefined) {
-			return;
-		}
 		update(notification.user);
 		break;
 	case MessageType.DELETE:

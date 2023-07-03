@@ -138,19 +138,23 @@ export class User {
   			);
   		}
 
+		let userName = user.username;
+		let age = user.age;
+		let hobbies = user.hobbies;
+
   		if (isNotBlank(body.username)) {
-  			user.username = body.username;
+			userName = body.username;
   		}
 
   		if (isPositiveNumber(body.age)) {
-  			user.age = body.age;
+			age = body.age;
   		}
 
   		if (isNotBlankStringArray(body.hobbies)) {
-  			user.hobbies = body.hobbies;
+			hobbies = body.hobbies;
   		}
 
-  		update(user!);
+  		update(new UserDTO(userId, userName, age, hobbies));
 
   		res.response.writeHead(HTTP_OK, CONTENT_TYPE_JSON);
   		res.response.end();
